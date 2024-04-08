@@ -36,6 +36,7 @@ design_sites:
         name: BERKELEY
         parent_name: Global/USA-Test
     site_type: area
+
   - site:
       building:
         name: BLD10
@@ -126,6 +127,7 @@ design_sites:
         longitude: -121.916327
         country: United States
     site_type: building
+    
   - site:
       floor:
         name: BLD10_FLOOR1

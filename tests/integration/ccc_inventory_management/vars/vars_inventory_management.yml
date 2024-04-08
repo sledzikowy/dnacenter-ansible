@@ -22,6 +22,7 @@ device_details:
     cli_transport: "ssh"
     netconf_port: 830
 
+
   # - type: "NETWORK_DEVICE"
   #   ip_address_list: ["204.192.6.200"]
   #   device_added: True

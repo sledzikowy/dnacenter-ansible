@@ -16,6 +16,7 @@ single_ip:
     timeout: 1
 
 
+
 ip_range:
   - discovery_name: Single Range Discovery 1
     discovery_type: "RANGE"
