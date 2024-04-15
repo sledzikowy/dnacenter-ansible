@@ -2,7 +2,6 @@
 device_details:
   - type: "NETWORK_DEVICE"
     ip_address_list: ["204.1.2.5"]
-    device_added: True
     # CLI Credentials
     username: "cisco"
     password: "Cisco#123"
