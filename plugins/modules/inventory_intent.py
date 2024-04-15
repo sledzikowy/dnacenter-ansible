@@ -1924,11 +1924,12 @@ class DnacDevice(DnacBase):
 
         return udf_id
 
-    def mandatory_parameter(self):
+    def mandatory_parameter(self, device_to_add_in_ccc):
         """
         Check for and validate mandatory parameters for adding network devices in Cisco Catalyst Center.
         Parameters:
             self (object): An instance of a class used for interacting with Cisco Cisco Catalyst Center.
+            device_to_add_in_ccc(list): List to device ip addresses to be added in Cisco Catalyst Center.
         Returns:
             dict: The input `config` dictionary if all mandatory parameters are present.
         Description:
@@ -1953,12 +1954,12 @@ class DnacDevice(DnacBase):
 
         if mandatory_params_absent:
             self.status = "failed"
-            self.msg = "Required parameters {0} for adding devices are not present".format(str(mandatory_params_absent))
+            self.msg = "Required parameters {0} for adding devices '{1}' are not present".format(str(mandatory_params_absent), str(device_to_add_in_ccc))
             self.result['msg'] = self.msg
             self.log(self.msg, "ERROR")
         else:
             self.status = "success"
-            self.msg = "Required parameter for Adding the devices in Inventory are present."
+            self.msg = "Required parameters for adding the devices '{0}' to inventory are present.".format(str(device_to_add_in_ccc))
             self.log(self.msg, "INFO")
 
         return self
@@ -2569,6 +2570,7 @@ class DnacDevice(DnacBase):
 
         # Call the Get interface details by device IP API and fetch the interface Id
         is_update_occurred = False
+        response_list = []
         for device_ip in device_to_update:
             interface_params = self.config[0].get('update_interface_details')
             interface_names_list = interface_params.get('interface_name')
@@ -2597,7 +2599,7 @@ class DnacDevice(DnacBase):
                         if response.get('role').upper() != "ACCESS":
                             self.msg = "The action to clear the MAC Address table is only supported for devices with the ACCESS role."
                             self.log(self.msg, "WARNING")
-                            self.result['response'] = self.msg
+                            response_list.append(self.msg)
                             self.result['changed'] = False
                         else:
                             deploy_mode = interface_params.get('deployment_mode', 'Deploy')
@@ -2663,7 +2665,7 @@ class DnacDevice(DnacBase):
                                 self.status = "success"
                                 is_update_occurred = True
                                 self.msg = "Successfully updated the Interface Details for device '{0}'.".format(device_ip)
-                                self.result['response'] = self.msg
+                                response_list.append(self.msg)
                                 self.log(self.msg, "INFO")
                                 break
                             elif execution_details.get("isError"):
@@ -2683,9 +2685,10 @@ class DnacDevice(DnacBase):
                     self.result['changed'] = False
                     self.msg = "Port actions are only supported on user facing/access ports as it's not allowed or No Updation required"
                     self.log(self.msg, "INFO")
-                    self.result['response'] = self.msg
+                    response_list.append(self.msg)
 
         self.result['changed'] = is_update_occurred
+        self.result['response'] = response_list
 
         return self
 
@@ -2977,7 +2980,8 @@ class DnacDevice(DnacBase):
                     device_params.pop('snmpPrivPassphrase', None)
                     device_params.pop('snmpPrivProtocol', None)
 
-            self.mandatory_parameter().check_return_status()
+            device_to_add_in_ccc = device_params['ipAddress']
+            self.mandatory_parameter(device_to_add_in_ccc).check_return_status()
             try:
                 response = self.dnac._exec(
                     family="devices",
@@ -3028,6 +3032,7 @@ class DnacDevice(DnacBase):
             devices_to_update_role = self.get_device_ips_from_config_priority()
             device_role = self.config[0].get('role')
             role_update_count = 0
+            role_updated_list = []
             for device_ip in devices_to_update_role:
                 device_id = self.get_device_ids([device_ip])
 
@@ -3072,10 +3077,8 @@ class DnacDevice(DnacBase):
 
                             if 'successfully' in progress or 'succesfully' in progress:
                                 self.status = "success"
-                                self.result['changed'] = True
-                                self.msg = "Device(s) '{0}' role updated successfully to '{1}'".format(str(devices_to_update_role), device_role)
-                                self.result['response'] = self.msg
-                                self.log(self.msg, "INFO")
+                                self.log("Device '{0}' role updated successfully to '{1}'".format(device_ip, device_role), "INFO")
+                                role_updated_list.append(device_ip)
                                 break
                             elif execution_details.get("isError"):
                                 self.status = "failed"
@@ -3096,9 +3099,16 @@ class DnacDevice(DnacBase):
                 self.status = "success"
                 self.result['changed'] = False
                 self.msg = """The device role '{0}' is already set in Cisco Catalyst Center, no device role update is needed for the
-                  devices {1}.""".format(device_role, str(devices_to_update_role))
+                  device(s) {1}.""".format(device_role, str(devices_to_update_role))
                 self.log(self.msg, "INFO")
                 self.result['response'] = self.msg
+
+            if role_updated_list:
+                self.status = "success"
+                self.result['changed'] = True
+                self.msg = "Device(s) '{0}' role updated successfully to '{1}'".format(str(role_updated_list), device_role)
+                self.result['response'] = self.msg
+                self.log(self.msg, "INFO")
 
         if credential_update:
             device_to_update = self.get_device_ips_from_config_priority()
