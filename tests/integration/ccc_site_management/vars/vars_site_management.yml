@@ -36,7 +36,6 @@ design_sites:
         name: BERKELEY
         parent_name: Global/USA-Test
     site_type: area
-
   - site:
       building:
         name: BLD10
