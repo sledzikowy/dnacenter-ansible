@@ -130,6 +130,7 @@ jobs:
             export PATH="$PYENV_ROOT/shims/python:$PATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
+            env
 
             # Install ansible, dnacentersdk
             pip install --upgrade pip
