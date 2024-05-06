@@ -128,6 +128,7 @@ jobs:
             export PATH="$PYENV_ROOT/shims/python3:$PATH"
             export PATH="$PYENV_ROOT/shims/python:$PATH"
             export PATH="$PYENV_ROOT/shims/pip:$PATH"
+            export PATH="$PYENV_ROOT/shims:$PATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
             pyenv local ansible
@@ -250,6 +251,7 @@ jobs:
             export PATH="$PYENV_ROOT/shims/python3:$PATH"
             export PATH="$PYENV_ROOT/shims/python:$PATH"
             export PATH="$PYENV_ROOT/shims/pip:$PATH"
+            export PATH="$PYENV_ROOT/shims:$PATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
             pyenv local ansible
