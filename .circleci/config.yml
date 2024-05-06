@@ -73,7 +73,7 @@ jobs:
 
     machine: true
     resource_class: rukapse/dnacenter-ansible
-    #working_directory: ~/repo 
+    working_directory: ~/repo 
 
     environment:
       REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
@@ -89,10 +89,10 @@ jobs:
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
             env
-            pwd
-            id
 
-      - checkout
+      - run:
+          name: Custom Git Clone
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL
 
       - run:
           name: Create Roles File header
@@ -235,7 +235,9 @@ jobs:
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
             env
 
-      - checkout
+      - run:
+          name: Custom Git Clone
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL
 
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
@@ -319,45 +321,45 @@ workflows:
           requires:
             - pre
 
-  #     - path-filtering/filter:
-  #         requires:
-  #           - build
-  #         base-revision: main
-  #         config-path: .circleci/config.yml
-  #         mapping: |
-  #           .* run-setup false
+      - path-filtering/filter:
+          requires:
+            - build
+          base-revision: main
+          config-path: .circleci/config.yml
+          mapping: |
+            .* run-setup false
 
-  #           plugins/.* run-any true
-  #           tests/integration/.* run-any true
+            plugins/.* run-any true
+            tests/integration/.* run-any true
 
-  #           plugins/module_utils/.* run-all true
+            plugins/module_utils/.* run-all true
 
-  #           plugins/modules/site_workflow_manager.py run-site true
-  #           plugins/modules/device_credential_workflow_manager.py run-devicecredential true
-  #           plugins/modules/discovery_workflow_manager.py run-discovery true
-  #           plugins/modules/inventory_workflow_manager.py run-inventory true
-  #           plugins/modules/swim_workflow_manager.py run-swim true
-  #           plugins/modules/pnp_workflow_manager.py run-pnp true
+            plugins/modules/site_workflow_manager.py run-site true
+            plugins/modules/device_credential_workflow_manager.py run-devicecredential true
+            plugins/modules/discovery_workflow_manager.py run-discovery true
+            plugins/modules/inventory_workflow_manager.py run-inventory true
+            plugins/modules/swim_workflow_manager.py run-swim true
+            plugins/modules/pnp_workflow_manager.py run-pnp true
             
-  #           tests/integration/ccc_site_management/.* run-site true    
-  #           tests/integration/ccc_device_credential_management/.* run-devicecredential true
-  #           tests/integration/ccc_discovery_management/.* run-discovery true
-  #           tests/integration/ccc_inventory_management/.* run-inventory true
-  #           tests/integration/ccc_swim_management/.* run-swim true
-  #           tests/integration/ccc_pnp_management/.* run-pnp true
+            tests/integration/ccc_site_management/.* run-site true    
+            tests/integration/ccc_device_credential_management/.* run-devicecredential true
+            tests/integration/ccc_discovery_management/.* run-discovery true
+            tests/integration/ccc_inventory_management/.* run-inventory true
+            tests/integration/ccc_swim_management/.* run-swim true
+            tests/integration/ccc_pnp_management/.* run-pnp true
 
-  # integration-testing:
-  #   when: << pipeline.parameters.run-any >> 
-  #   jobs:          
-  #     - addrole
+  integration-testing:
+    when: << pipeline.parameters.run-any >> 
+    jobs:          
+      - addrole
 
-  #     - sanity-tests:
-  #         requires:
-  #           - addrole
-  #         matrix:
-  #           parameters:
-  #             ansible_cisco_dnac_version:
-  #               - "6.9.0"
+      - sanity-tests:
+          requires:
+            - addrole
+          matrix:
+            parameters:
+              ansible_cisco_dnac_version:
+                - "6.9.0"
       # - post_pnp_testing:
       #     requires:
       #       - sanity-tests
