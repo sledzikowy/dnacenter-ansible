@@ -123,13 +123,13 @@ jobs:
           command: |
             set -x 
             # Activate Virtual Environment
-            pyenv local ansible
             export PYENV_ROOT="$HOME/.pyenv"
             export PATH="$PYENV_ROOT/bin:$PATH"
             export PATH="$PYENV_ROOT/shims/python3:$PATH"
             export PATH="$PYENV_ROOT/shims/python:$PATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
+            pyenv local ansible
             env
 
             # Install ansible, dnacentersdk
