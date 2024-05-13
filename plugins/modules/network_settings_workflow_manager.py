@@ -332,8 +332,8 @@ options:
                     type: list
                 type: dict
 requirements:
-- dnacentersdk == 2.4.5
-- python >= 3.5
+- dnacentersdk >= 2.4.5
+- python >= 3.9
 notes:
   - SDK Method used are
     network_settings.NetworkSettings.create_global_pool,
@@ -1075,6 +1075,14 @@ class NetworkSettings(DnacBase):
                     }
                 })
 
+        network_settings_snmp = network_settings.get("snmpServer")
+        if not network_settings_snmp.get("ipAddresses"):
+            network_settings_snmp.update({"ipAddresses": []})
+
+        network_settings_syslog = network_settings.get("syslogServer")
+        if not network_settings_syslog.get("ipAddresses"):
+            network_settings_syslog.update({"ipAddresses": []})
+
         self.log("Formatted playbook network details: {0}".format(network_details), "DEBUG")
         return network_details
 
@@ -1321,9 +1329,8 @@ class NetworkSettings(DnacBase):
         network = {}
         site_name = network_details.get("site_name")
         if site_name is None:
-            self.msg = "Mandatory Parameter 'site_name' missing"
-            self.status = "failed"
-            return self
+            site_name = "Global"
+            network_details.update({"site_name": site_name})
 
         site_id = self.get_site_id(site_name)
         if site_id is None:
@@ -1514,8 +1521,6 @@ class NetworkSettings(DnacBase):
                 "ipv4DhcpServers": item.get("ipv4_dhcp_servers"),
                 "ipv4DnsServers": item.get("ipv4_dns_servers"),
                 "ipv4Subnet": item.get("ipv4_subnet"),
-                "ipv6GlobalPool": self.get_global_pool_cidr(item.get("ipv6_global_pool"),
-                                                            item.get("ipv6_global_pool_name")),
                 "ipv6Prefix": item.get("ipv6_prefix"),
                 "ipv6PrefixLength": item.get("ipv6_prefix_length"),
                 "ipv6GateWay": item.get("ipv6_gateway"),
@@ -1526,6 +1531,11 @@ class NetworkSettings(DnacBase):
                 "ipv6TotalHost": item.get("ipv6_total_host")
             }
             # Check for missing mandatory parameters in the playbook
+            if pool_values.get("ipv6AddressSpace") is True:
+                pool_values.update({
+                    "ipv6GlobalPool": self.get_global_pool_cidr(item.get("ipv6_global_pool"),
+                                                                item.get("ipv6_global_pool_name"))})
+
             if not pool_values.get("name"):
                 self.msg = "Missing mandatory parameter 'name' in reserve_pool_details '{0}' element" \
                            .format(reserve_pool_index + 1)
@@ -1535,16 +1545,16 @@ class NetworkSettings(DnacBase):
             if pool_values.get("ipv4Prefix") is True:
                 if pool_values.get("ipv4Subnet") is None and \
                         pool_values.get("ipv4TotalHost") is None:
-                    self.msg = "missing parameter 'ipv4_subnet' or 'ipv4TotalHost' \
-                        while adding the ipv4 in reserve_pool_details '{0}' element".format(reserve_pool_index + 1)
+                    self.msg = "Failed to add IPv4 in reserve_pool_details '{0}'. ".format(reserve_pool_index + 1) + \
+                               "Required parameters 'ipv4_subnet' or 'ipv4_total_host' are missing."
                     self.status = "failed"
                     return self
 
             if pool_values.get("ipv6Prefix") is True:
                 if pool_values.get("ipv6Subnet") is None and \
                         pool_values.get("ipv6TotalHost") is None:
-                    self.msg = "missing parameter 'ipv6_subnet' or 'ipv6TotalHost' \
-                        while adding the ipv6 in reserve_pool_details '{0}' element".format(reserve_pool_index + 1)
+                    self.msg = "Failed to add IPv6 in reserve_pool_details '{0}'. ".format(reserve_pool_index + 1) + \
+                               "Required parameters 'ipv6_subnet' or 'ipv6_total_host' are missing."
                     self.status = "failed"
                     return self
 
@@ -1584,8 +1594,7 @@ class NetworkSettings(DnacBase):
                     del pool_values['ipv6Prefix']
 
                 if not pool_values.get("ipv6AddressSpace"):
-                    keys_to_check = ['ipv6GlobalPool', 'ipv6PrefixLength',
-                                     'ipv6GateWay', 'ipv6DhcpServers',
+                    keys_to_check = ['ipv6PrefixLength', 'ipv6GateWay', 'ipv6DhcpServers',
                                      'ipv6DnsServers', 'ipv6TotalHost']
                     for key in keys_to_check:
                         if pool_values.get(key) is None:
@@ -1796,8 +1805,7 @@ class NetworkSettings(DnacBase):
                 })
             else:
                 if clientAndEndpoint_aaa.get("servers") == "ISE":
-                    self.msg = "missing parameter ip_address in clientAndEndpoint_aaa, \
-                        server ISE is set"
+                    self.msg = "Failed to process client_and_endpoint_aaa due to missing 'ip_address' parameter. ISE server is configured."
                     self.status = "failed"
                     return self
 
@@ -1807,7 +1815,7 @@ class NetworkSettings(DnacBase):
                     clientAndEndpoint_aaa.get("network")
                 })
             else:
-                self.msg = "missing parameter network in clientAndEndpoint_aaa"
+                self.msg = "Failed to process client_and_endpoint_aaa due to missing parameter 'network' in the playbook."
                 self.status = "failed"
                 return self
 
@@ -1817,7 +1825,7 @@ class NetworkSettings(DnacBase):
                     clientAndEndpoint_aaa.get("protocol")
                 })
             else:
-                self.msg = "missing parameter protocol in clientAndEndpoint_aaa"
+                self.msg = "Failed to process client_and_endpoint_aaa due to missing parameter 'protocol' in the playbook."
                 self.status = "failed"
                 return self
 
@@ -1827,7 +1835,7 @@ class NetworkSettings(DnacBase):
                     clientAndEndpoint_aaa.get("servers")
                 })
             else:
-                self.msg = "missing parameter servers in clientAndEndpoint_aaa"
+                self.msg = "Failed to process client_and_endpoint_aaa due to missing parameter 'servers' in the playbook."
                 self.status = "failed"
                 return self
 
@@ -2302,8 +2310,7 @@ class NetworkSettings(DnacBase):
                      .format(config.get("network_management_details").get("site_name")), "INFO")
             self.result.get("response")[2].get("network").update({"Validation": "Success"})
 
-        self.msg = "Successfully validated the Global Pool, Reserve Pool \
-                    and the Network Functions."
+        self.msg = "Successfully validated the Global Pool, Reserve Pool and the Network Functions."
         self.status = "success"
         return self
 
