@@ -267,7 +267,25 @@ jobs:
             pip install dnacentersdk
             ansible --version
 
+          environment:
+            PYTHONPATH: $HOME/.ansible/collections/:$PYTHONPATH
+
+      - run:
+          name: Install the collection tarball
+          command: |
+            set -x 
+            pyenv versions
+            python --version
+            ansible --version  
+
             ansible-galaxy collection install --force ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz
+            
+      - run:
+          name: Run sanity tests
+          command: |
+            export ANSIBLE_PERSISTENT_CONNECT_TIMEOUT=1000
+            export ANSIBLE_PERSISTENT_COMMAND_TIMEOUT=1000
+            export ANSIBLE_ROLES_PATH=/home/circleci/repo/dnacenter-ansible/tests/integration
 
             ansible-playbook -i hosts ccc_roles.yml
 
