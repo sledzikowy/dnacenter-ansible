@@ -264,8 +264,11 @@ jobs:
             pip install jinja2 PyYAML cryptography paramiko 
             pip install pyzipper
             pip install ansible 
-            pip install dnacentersdk
-            ansible --version
+            pip install dnacentersdk      
+ 
+            pyenv versions
+            python --version
+            ansible --version  
 
           environment:
             PYTHONPATH: $HOME/.ansible/collections/:$PYTHONPATH
@@ -274,7 +277,9 @@ jobs:
           name: Install the collection tarball
           command: |
             set -x 
-
+            pyenv versions
+            python --version
+            ansible --version  
 
             ansible-galaxy collection install --force ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz
             
