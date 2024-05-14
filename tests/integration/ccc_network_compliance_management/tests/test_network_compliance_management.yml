@@ -23,67 +23,57 @@
   # - debug:
   #     msg: "{{ vars_map. }}"
 
+#############################################
+#                Add Devices                #
+#############################################
+
+  - name: Add new device
+    cisco.dnac.inventory_workflow_manager:
+      <<: *dnac_login
+      state: merged
+      config:
+        - "{{ item }}"
+    loop: "{{ vars_map.device_details }}"
+    register: result_add_device
+
+  # - name: Debug item
+  #   debug:
+  #     var: item
+  #   loop: "{{ result_add_device.results }}"
+
+  # - name: Assert device addition success
+  #   assert:
+  #     that:
+  #       - item.changed == true
+  #       - "'added to Cisco Catalyst Center' in item.msg"
+  #   loop: "{{ result_add_device.results }}"
+  #   when: result_add_device is defined
 
 #############################################
-#      Run Full Compliance on IP List       #
+#           Run Full Compliance             #
 #############################################
 
-  - name: Run full complaince check 
+  - name: Pause for 60 seconds before updating interfaces
+    pause:
+      seconds: 60
+
+#############################################
+#           Run Full Compliance             #
+#############################################
+  
+  - name: Run full complaince check on Site
     cisco.dnac.network_compliance_workflow_manager:
       <<: *dnac_login
       dnac_log_append: False
-      config:
-        - ip_address_list: ['204.1.2.2']
-          #ip_address_list: ['204.1.2.2', '204.1.2.5', '204.1.2.4']
-          #ip_address_list: ['204.1.2.2','204.1.2.4' ]
-          site_name: "Global"
-          #run_compliance: True
-          run_compliance: False
-          #run_compliance:
-          run_compliance_categories: ['INTENT']
-          #sync_device_config: True
-
-#############################################
-#        Run Full Compliance on Site        #
-#############################################
-  
-#   - name: Run full complaince check on Site
-#     cisco.dnac.network_compliance_workflow_manager:
-#       <<: *dnac_login
-#       dnac_log_append: False
-#       config:
-#         - site: "Global"
-#           run_compliance:
-#              trigger_full: True
-       
-# #############################################
-# # Run Compliance with Categories on IP List #
-# #############################################
-
-#   - name: Run complaince check with specific categories on IP list
-#     cisco.dnac.network_compliance_workflow_manager:
-#       <<: *dnac_login
-#       dnac_log_append: False
-#       config:
-#         - #ip_address_list: ['204.1.2.5']
-#           ip_address_list: ['204.1.2.2', '204.1.2.5', '204.1.2.4']
-#           run_compliance:
-#              trigger_full: False
-#              categories: ['INTENT', 'RUNNING_CONFIG' , 'IMAGE' , 'PSIRT']
-
-# #############################################
-# #   Run Compliance with Categories on Site  #
-# #############################################
-
-#   - name:  Run Compliance with Categories on Site
-#     cisco.dnac.network_compliance_workflow_manager:
-#       <<: *dnac_login
-#       dnac_log_append: False
-#       config:
-#         - site_name: "Global"
-#           run_compliance:
-#              trigger_full: False
-#              categories: ['INTENT', 'RUNNING_CONFIG' , 'IMAGE' , 'PSIRT']
+      config:  
+        - "{{ item }}"
+    loop: "{{ vars_map.run_complaince }}"
+    register: run_complaince
+ 
+  - name: Debug item
+    debug:
+      var: item
+    loop: "{{ run_complaince.results }}"
 
 # #############################################
 # #       Sync Device Config on IP List       #
@@ -97,17 +87,3 @@
 #         - #ip_address_list: ['204.1.2.5']
 #           ip_address_list: ['204.1.2.2', '204.1.2.5', '204.1.2.4']
 #           sync_device_config: True
-
-# #############################################
-# #         Sync Device Config on Site        #
-# #############################################
-
-#   - name: Sync Device Config on Site
-#     cisco.dnac.network_compliance_workflow_manager:
-#       <<: *dnac_login
-#       dnac_log_append: False
-#       config:
-#         - site_name: "Global"
-#           sync_device_config: True
-
-#  

@@ -1,3 +1,63 @@
----
+--- 
+device_details:
+  - type: "NETWORK_DEVICE"
+    ip_address_list: ["204.1.2.5"]
+    # CLI Credentials
+    username: "cisco"
+    password: "Cisco#123"
+    enable_password: "Cisco#123"
+    # SNMP Credentials
+    snmp_version: v3
+    snmp_username: "v3Public2"
+    snmp_mode: "AUTHPRIV"
+    snmp_auth_protocol: "SHA"
+    snmp_auth_passphrase: "Lablab#1234"
+    snmp_priv_protocol: "CISCOAES256"
+    snmp_priv_passphrase: "Lablab#1234"
+    #SNMP Retry and Timeout
+    snmp_retry: 3
+    snmp_timeout: 5
+    #CLI Transport (ssh, Telnet)
+    cli_transport: "ssh"
+    netconf_port: 830 
 
 
+run_complaince:
+  - ip_address_list: ['204.1.2.5'] 
+
+  - ip_address_list: ['204.1.2.5'] 
+    site_name: 'Global'     
+
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global'
+    run_complaince: True
+
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global'
+    run_complaince: False
+
+
+sync_device_config: 
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global'
+    sync_device_config: True
+
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global' 
+    run_complaince: True
+    sync_device_config: True
+
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global' 
+    run_complaince: True
+    sync_device_config: False
+
+  - ip_address_list: ['204.1.2.5']
+    site_name: 'Global' 
+    run_complaince: False
+    sync_device_config: True
+
+
+delete_devices:
+  - ip_address_list: ["204.1.2.5"]
+    clean_config: False
