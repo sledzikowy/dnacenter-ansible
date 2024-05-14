@@ -274,9 +274,7 @@ jobs:
           name: Install the collection tarball
           command: |
             set -x 
-            pyenv versions
-            python --version
-            ansible --version  
+
 
             ansible-galaxy collection install --force ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz
             
