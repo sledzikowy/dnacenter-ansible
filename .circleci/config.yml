@@ -227,7 +227,7 @@ jobs:
       CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
       CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
 
-    steps: 
+    steps:
       - run:
           name: Debug information
           command: |
@@ -241,19 +241,22 @@ jobs:
           name: Custom Git Clone
           command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL
 
-     - run:
+      - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
-            set -x 
+            set -x  
+            pyenv local ansible 
+
             # Activate Virtual Environment
-            pyenv local ansible
             export PYENV_ROOT="$HOME/.pyenv"
             export PATH="$PYENV_ROOT/bin:$PATH"
             export PATH="$PYENV_ROOT/shims/python3:$PATH"
-            export PATH="$PYENV_ROOT/shims/python:$PATH"
+            export PATH="$PYENV_ROOT/shims/python:$PATH" 
+
+
             export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
             export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
-
+            
             export PATH="$HOME/.ansible/collections/:$PATH"
             export PYTHONPATH="$HOME/.ansible/collections/:$PYTHONPATH"
 
@@ -295,18 +298,18 @@ jobs:
             set -x 
             rm -rf ${HOME}/repo/$CIRCLE_PROJECT_REPONAME
 
-  # post_pnp_testing:
-  #   machine: true
-  #   resource_class: rukapse/dnacenter-ansible
-  #   working_directory: ~/repo 
+  post_pnp_testing:
+    machine: true
+    resource_class: rukapse/dnacenter-ansible
+    working_directory: ~/repo 
 
-  #   steps:
-  #     - when:
-  #         condition: << pipeline.parameters.run-pnp >>
-  #         steps:
-  #           - run: 
-  #               command: |
-  #                 python ${HOME}/static/pnp_script.py
+    steps:
+      - when:
+          condition: << pipeline.parameters.run-pnp >>
+          steps:
+            - run: 
+                command: |
+                  python ${HOME}/static/pnp_script.py
 
 workflows:  
   
