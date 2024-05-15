@@ -274,6 +274,7 @@ jobs:
           name: Install the collection tarball
           command: |
             set -x 
+            export PYENV_ROOT="$HOME/.pyenv"
             pyenv versions
             python --version
             ansible --version  
