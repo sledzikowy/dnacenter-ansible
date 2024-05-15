@@ -117,20 +117,23 @@ jobs:
             mkdir -p group_vars
             cp ${HOME}/static/group_vars/dnac_servers.yml group_vars/dnac_servers.yml
             cp ${HOME}/static/hosts hosts
-
+      - run:
+          name: Export env vars
+          command: |
+            set -x
+            echo 'export PYENV_ROOT="$HOME/.pyenv"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/python3:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/python:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/pip:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims:$PATH"' >> "$BASH_ENV"
+            echo 'export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"' >> "$BASH_ENV"
+            echo 'export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"' >> "$BASH_ENV"
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
             set -x 
             # Activate Virtual Environment
-            export PYENV_ROOT="$HOME/.pyenv"
-            export PATH="$PYENV_ROOT/bin:$PATH"
-            export PATH="$PYENV_ROOT/shims/python3:$PATH"
-            export PATH="$PYENV_ROOT/shims/python:$PATH"
-            export PATH="$PYENV_ROOT/shims/pip:$PATH"
-            export PATH="$PYENV_ROOT/shims:$PATH"
-            export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
-            export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
             pyenv local ansible
       
             # Install ansible, dnacentersdk
@@ -240,20 +243,25 @@ jobs:
       - run:
           name: Custom Git Clone
           command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL
-
+      - run:
+          name: Export env vars
+          command: |
+            set -x
+            echo 'export PYENV_ROOT="$HOME/.pyenv"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/python3:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/python:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims/pip:$PATH"' >> "$BASH_ENV"
+            echo 'export PATH="$PYENV_ROOT/shims:$PATH"' >> "$BASH_ENV"
+            echo 'export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"' >> "$BASH_ENV"
+            echo 'export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"' >> "$BASH_ENV"
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
             set -x 
+            echo "$BASH_ENV"
+            cat $BASH_ENV
             # Activate Virtual Environment
-            export PYENV_ROOT="$HOME/.pyenv"
-            export PATH="$PYENV_ROOT/bin:$PATH"
-            export PATH="$PYENV_ROOT/shims/python3:$PATH"
-            export PATH="$PYENV_ROOT/shims/python:$PATH"
-            export PATH="$PYENV_ROOT/shims/pip:$PATH"
-            export PATH="$PYENV_ROOT/shims:$PATH"
-            export PYTHONPATH="$PYENV_ROOT/shims/python3:$PYTHONPATH"
-            export PYTHONPATH="$PYENV_ROOT/shims/python:$PYTHONPATH"
             pyenv local ansible
 
             export PATH="$HOME/.ansible/collections/:$PATH"
