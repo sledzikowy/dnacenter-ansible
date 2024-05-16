@@ -79,7 +79,6 @@ jobs:
       - run:
           name: Debug information
           command: |
-            set -x 
             echo "REPO_URL: $REPO_URL"
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
@@ -115,7 +114,6 @@ jobs:
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
-            set -x 
             # Install ansible, dnacentersdk
             pip install --upgrade pip
             pip install jinja2 PyYAML cryptography paramiko
