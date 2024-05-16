@@ -84,9 +84,9 @@ jobs:
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
             env
-            pwd
-            ls
-      - checkout
+      - run:
+          name: Clone repo to workspace
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
 
       - run:
           name: Create Roles File header
@@ -224,7 +224,10 @@ jobs:
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
             env
 
-      - checkout
+      - run:
+          name: Clone repo to workspace
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
