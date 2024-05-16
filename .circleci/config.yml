@@ -102,7 +102,9 @@ jobs:
             echo "  roles:" >> workspace/ccc_roles.yml
 
             cat workspace/ccc_roles.yml
-
+      - restore_cache:
+          keys:
+            - pip-cache
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
@@ -121,6 +123,11 @@ jobs:
           paths:
             - '*.tar.gz'
             - ccc_roles.yml
+
+      - save_cache: # should be changed to run only on requirements.txt change
+          key: pip-cache
+          paths:
+            - ~/.cache/pip
 
   addrole:
     #machine: true
@@ -184,15 +191,13 @@ jobs:
       - run:
           name: Move artifacts to workspace root
           command: |
-            ls workspace
+            ls -alh workspace
             cat workspace/ccc_roles.yml
-            mv workspace/* .
 
       - save_cache:
           key: collection-<< pipeline.git.revision >>
           paths:
-            - '*.tar.gz'
-            - ccc_roles.yml
+            - 'workspace'
 
   sanity-tests:
     parameters: 
@@ -225,6 +230,7 @@ jobs:
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
+            - pip-cache
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
@@ -236,17 +242,18 @@ jobs:
             pip install ansible 
             pip install dnacentersdk
             ansible --version
-            ls -alh
+            ls -alhW
       - run:
           name: Install the collection tarball
           command: |
             python --version
             ansible --version  
-            ansible-galaxy collection install --force *.tar.gz
+            ansible-galaxy collection install --force workspace/*.tar.gz
       - run:
           name: Copy static files
           command: |
             mkdir -p group_vars
+            cp workspace/ccc_roles.yml ccc_roles.yml
             echo ${GROUP_VARS} | base64 -d > group_vars/dnac_servers.yml
             echo ${DNAC_HOSTS} | base64 -d > hosts
       - run:
