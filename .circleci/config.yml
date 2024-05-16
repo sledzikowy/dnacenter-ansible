@@ -44,7 +44,7 @@ jobs:
 
     #machine: true
     docker:
-      - image: python/3.8.10
+      - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube
 
     environment:
@@ -68,7 +68,7 @@ jobs:
 
     #machine: true
     docker:
-      - image: python/3.8.10
+      - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube
     environment:
       REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
@@ -133,7 +133,7 @@ jobs:
   addrole:
     #machine: true
     docker:
-      - image: python/3.8.10
+      - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube
 
     steps:
@@ -205,7 +205,7 @@ jobs:
 
     #machine: true
     docker:
-      - image: python/3.8.10
+      - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube 
 
     environment:
@@ -261,7 +261,7 @@ jobs:
   post_pnp_testing:
     #machine: true
     docker:
-      - image: python/3.8.10
+      - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube
 
     steps:
