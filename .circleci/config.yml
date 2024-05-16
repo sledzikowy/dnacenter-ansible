@@ -125,6 +125,7 @@ jobs:
             ansible --version
             # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
             ansible-galaxy collection build --force --output-path workspace/
+            ls -alh workspace
       - persist_to_workspace:
           root: 'workspace'
           paths:
@@ -248,7 +249,7 @@ jobs:
             set -x 
             python --version
             ansible --version  
-
+            ls -alh workspace
             ansible-galaxy collection install --force workspace/*.tar.gz
             
       - run:
