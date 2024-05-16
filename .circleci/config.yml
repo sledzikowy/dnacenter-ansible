@@ -88,23 +88,6 @@ jobs:
                 name: Clone repo to workspace
                 command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
 
-            - run:
-                name: Create Roles File header
-                command: |
-                  mkdir workspace
-                  echo "---" > workspace/ccc_roles.yml
-                  echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
-                  echo "  gather_facts: no" >> workspace/ccc_roles.yml
-                  echo "  connection: local" >> workspace/ccc_roles.yml
-                  echo "  " >> workspace/ccc_roles.yml
-                  echo "  tasks:" >> workspace/ccc_roles.yml
-                  echo "  " >> workspace/ccc_roles.yml
-                  echo "  vars:" >> workspace/ccc_roles.yml
-                  echo "    debug: false" >> workspace/ccc_roles.yml
-                  echo "  " >> workspace/ccc_roles.yml
-                  echo "  roles:" >> workspace/ccc_roles.yml
-
-                  cat workspace/ccc_roles.yml
             - restore_cache:
                 keys:
                   - pip-cache
@@ -125,7 +108,6 @@ jobs:
                 root: 'workspace'
                 paths:
                   - '*.tar.gz'
-                  - ccc_roles.yml
 
             - save_cache: # should be changed to run only on requirements.txt change or moved to docker image build
                 key: pip-cache
@@ -144,6 +126,24 @@ jobs:
           steps:
             - attach_workspace:
                 at: workspace
+            - run:
+                name: Create Roles File header
+                command: |
+                  mkdir workspace
+                  cat /tmp/pipeline-parameters.json
+                  cat <<EOF > workspace/ccc_roles.yml
+                  ---
+                  - hosts: dnac_servers
+                    gather_facts: no
+                    connection: local
+                    
+                    tasks:
+                    
+                    vars:
+                      debug: false
+                    
+                    roles:
+                  EOF
             - when:
                 condition: 
                   or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
@@ -261,9 +261,9 @@ jobs:
             export ANSIBLE_PERSISTENT_COMMAND_TIMEOUT=1000
             export ANSIBLE_ROLES_PATH=$PWD/tests/integration
 
-            ls -alh 
+            ls -alh
             cat ccc_roles.yml
-
+            cat /tmp/pipeline-parameters.json
             ansible-playbook -i hosts ccc_roles.yml
 
           no_output_timeout: 120m
