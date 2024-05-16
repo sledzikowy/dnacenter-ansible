@@ -81,53 +81,56 @@ jobs:
             echo "REPO_URL: $REPO_URL"
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
-      - run:
-          name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - when:
+          condition: << pipeline.parameters.run-setup >>
+          steps:
+            - run:
+                name: Clone repo to workspace
+                command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
 
-      - run:
-          name: Create Roles File header
-          command: |
-            mkdir workspace
-            echo "---" > workspace/ccc_roles.yml
-            echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
-            echo "  gather_facts: no" >> workspace/ccc_roles.yml
-            echo "  connection: local" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  tasks:" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  vars:" >> workspace/ccc_roles.yml
-            echo "    debug: false" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  roles:" >> workspace/ccc_roles.yml
+            - run:
+                name: Create Roles File header
+                command: |
+                  mkdir workspace
+                  echo "---" > workspace/ccc_roles.yml
+                  echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
+                  echo "  gather_facts: no" >> workspace/ccc_roles.yml
+                  echo "  connection: local" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  tasks:" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  vars:" >> workspace/ccc_roles.yml
+                  echo "    debug: false" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  roles:" >> workspace/ccc_roles.yml
 
-            cat workspace/ccc_roles.yml
-      - restore_cache:
-          keys:
-            - pip-cache
-      - run:
-          name: Activate Virtual Environment, Install ansible and Build collection tarball
-          command: |
-            # Install ansible, dnacentersdk
-            pip install --upgrade pip
-            pip install jinja2 PyYAML cryptography paramiko
-            pip install pyzipper
-            pip install ansible 
-            pip install dnacentersdk
-            ansible --version
-            # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
-            ansible-galaxy collection build --force --output-path workspace/
+                  cat workspace/ccc_roles.yml
+            - restore_cache:
+                keys:
+                  - pip-cache
+            - run:
+                name: Activate Virtual Environment, Install ansible and Build collection tarball
+                command: |
+                  # Install ansible, dnacentersdk
+                  pip install --upgrade pip
+                  pip install jinja2 PyYAML cryptography paramiko
+                  pip install pyzipper
+                  pip install ansible 
+                  pip install dnacentersdk
+                  ansible --version
+                  # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
+                  ansible-galaxy collection build --force --output-path workspace/
 
-      - persist_to_workspace:
-          root: 'workspace'
-          paths:
-            - '*.tar.gz'
-            - ccc_roles.yml
+            - persist_to_workspace:
+                root: 'workspace'
+                paths:
+                  - '*.tar.gz'
+                  - ccc_roles.yml
 
-      - save_cache: # should be changed to run only on requirements.txt change
-          key: pip-cache
-          paths:
-            - ~/.cache/pip
+            - save_cache: # should be changed to run only on requirements.txt change or moved to docker image build
+                key: pip-cache
+                paths:
+                  - ~/.cache/pip
 
   addrole:
     #machine: true
@@ -136,61 +139,64 @@ jobs:
     resource_class: rukapse/dnacenter-ansible-minikube
 
     steps:
-      - attach_workspace:
-          at: workspace
       - when:
-          condition: 
-            or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
+          condition: << pipeline.parameters.run-setup >>
           steps:
-            - run: 
-                command: |
-                  echo "    - ccc_site_management" >> workspace/ccc_roles.yml
+            - attach_workspace:
+                at: workspace
+            - when:
+                condition: 
+                  or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_site_management" >> workspace/ccc_roles.yml
 
-      - when:
-          condition:
-            or: [ << pipeline.parameters.run-devicecredential >>, << pipeline.parameters.run-all >> ]
-          steps:
-            - run: 
-                command: |
-                  echo "    - ccc_device_credential_management" >> workspace/ccc_roles.yml
+            - when:
+                condition:
+                  or: [ << pipeline.parameters.run-devicecredential >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_device_credential_management" >> workspace/ccc_roles.yml
 
-      - when:
-          condition:
-            or: [ << pipeline.parameters.run-discovery >>, << pipeline.parameters.run-all >> ]
-          steps:
-            - run: 
-                command: |
-                  echo "    - ccc_discovery_management" >> workspace/ccc_roles.yml
+            - when:
+                condition:
+                  or: [ << pipeline.parameters.run-discovery >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_discovery_management" >> workspace/ccc_roles.yml
 
-      - when:
-          condition:
-            or: [ << pipeline.parameters.run-inventory >>, << pipeline.parameters.run-all >> ]
-          steps:
-            - run: 
-                command: |
-                  echo "    - ccc_inventory_management" >> workspace/ccc_roles.yml
+            - when:
+                condition:
+                  or: [ << pipeline.parameters.run-inventory >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_inventory_management" >> workspace/ccc_roles.yml
 
-      - when:
-          condition:
-            or: [ << pipeline.parameters.run-swim >>, << pipeline.parameters.run-all >> ]
-          steps:
-            - run: 
-                command: |
-                  echo "    - ccc_swim_management" >> workspace/ccc_roles.yml
+            - when:
+                condition:
+                  or: [ << pipeline.parameters.run-swim >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_swim_management" >> workspace/ccc_roles.yml
 
 
-      - when:
-          condition:
-            or: [ << pipeline.parameters.run-pnp >>, << pipeline.parameters.run-all >> ]
-          steps:
-            - run: 
-                command: |
-                  echo "    - ccc_pnp_management" >> workspace/ccc_roles.yml
+            - when:
+                condition:
+                  or: [ << pipeline.parameters.run-pnp >>, << pipeline.parameters.run-all >> ]
+                steps:
+                  - run: 
+                      command: |
+                        echo "    - ccc_pnp_management" >> workspace/ccc_roles.yml
 
-      - save_cache:
-          key: collection-<< pipeline.git.revision >>
-          paths:
-            - 'workspace'
+            - save_cache:
+                key: collection-<< pipeline.git.revision >>
+                paths:
+                  - 'workspace'
 
   sanity-tests:
     parameters: 
@@ -279,7 +285,6 @@ jobs:
 workflows:  
   
   build-test:
-    when: << pipeline.parameters.run-setup >>
     jobs:
       - pre
 
