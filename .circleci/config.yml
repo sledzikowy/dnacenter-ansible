@@ -182,7 +182,12 @@ jobs:
 
 
       - run:
-          command: cat workspace/ccc_roles.yml
+          name: Move artifacts to workspace root
+          command: |
+            ls workspace
+            cat workspace/ccc_roles.yml
+            mv workspace/* .
+
       - save_cache:
           key: collection-<< pipeline.git.revision >>
           paths:
