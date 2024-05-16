@@ -131,19 +131,17 @@ jobs:
                 command: |
                   mkdir workspace
                   cat /tmp/pipeline-parameters.json
-                  cat <<EOF > workspace/ccc_roles.yml
-                  ---
-                  - hosts: dnac_servers
-                    gather_facts: no
-                    connection: local
-                    
-                    tasks:
-                    
-                    vars:
-                      debug: false
-                    
-                    roles:
-                  EOF
+                  echo "---" > workspace/ccc_roles.yml
+                  echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
+                  echo "  gather_facts: no" >> workspace/ccc_roles.yml
+                  echo "  connection: local" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  tasks:" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  vars:" >> workspace/ccc_roles.yml
+                  echo "    debug: false" >> workspace/ccc_roles.yml
+                  echo "  " >> workspace/ccc_roles.yml
+                  echo "  roles:" >> workspace/ccc_roles.yml
             - when:
                 condition: 
                   or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
