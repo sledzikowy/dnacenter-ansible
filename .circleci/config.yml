@@ -243,8 +243,7 @@ jobs:
           command: |
             python --version
             ansible --version  
-            ls -alh workspace
-            ansible-galaxy collection install --force workspace/*.tar.gz
+            ansible-galaxy collection install --force *.tar.gz
       - run:
           name: Copy static files
           command: |
