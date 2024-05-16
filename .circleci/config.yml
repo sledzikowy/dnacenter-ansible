@@ -277,7 +277,7 @@ jobs:
 
 workflows:  
   
-  pre-testing:
+  build-test:
     when: << pipeline.parameters.run-setup >>
     jobs:
       - pre
@@ -319,11 +319,10 @@ workflows:
       - addrole:
           requires:
             - path-filtering/filter
-
-  integration-testing:
-    when: << pipeline.parameters.run-any >> 
-    jobs:          
+         
       - sanity-tests:
+          requires: 
+            - addrole
           context:
             - dnac-servers
           matrix:
