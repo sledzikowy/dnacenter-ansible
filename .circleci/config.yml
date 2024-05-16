@@ -183,8 +183,8 @@ jobs:
 
       - run:
           command: cat workspace/ccc_roles.yml
-      - persist_to_workspace:
-          root: 'workspace'
+      - save_cache:
+          key: collection-<< pipeline.git.revision >>
           paths:
             - '*.tar.gz'
             - ccc_roles.yml
@@ -216,7 +216,10 @@ jobs:
       - run:
           name: Clone repo to workspace
           command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
-
+          
+      - restore_cache:
+          keys:
+            - collection-<< pipeline.git.revision >>
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
@@ -309,17 +312,16 @@ workflows:
             tests/integration/ccc_inventory_management/.* run-inventory true
             tests/integration/ccc_swim_management/.* run-swim true
             tests/integration/ccc_pnp_management/.* run-pnp true
+      - addrole:
+          requires:
+            - path-filtering/filter
 
   integration-testing:
     when: << pipeline.parameters.run-any >> 
     jobs:          
-      - addrole
-
       - sanity-tests:
           context:
             - dnac-servers
-          requires:
-            - addrole
           matrix:
             parameters:
               ansible_cisco_dnac_version:
