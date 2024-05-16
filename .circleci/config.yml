@@ -74,7 +74,6 @@ jobs:
       REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
       CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
       CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
-
     steps:
       - run:
           name: Debug information
@@ -82,7 +81,6 @@ jobs:
             echo "REPO_URL: $REPO_URL"
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
-            env
       - run:
           name: Clone repo to workspace
           command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
@@ -105,12 +103,6 @@ jobs:
 
             cat workspace/ccc_roles.yml
 
-      - run:
-          name: Copy static files
-          command: |
-            mkdir -p group_vars
-            #cp ${HOME}/static/group_vars/dnac_servers.yml group_vars/dnac_servers.yml
-            #cp ${HOME}/static/hosts hosts
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
@@ -217,11 +209,9 @@ jobs:
       - run:
           name: Debug information
           command: |
-            set -x 
             echo "REPO_URL: $REPO_URL"
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
-            env
 
       - run:
           name: Clone repo to workspace
@@ -230,7 +220,6 @@ jobs:
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
-            set -x 
 
             # Install ansible, dnacentersdk
             pip install --upgrade pip
@@ -244,12 +233,16 @@ jobs:
       - run:
           name: Install the collection tarball
           command: |
-            set -x 
             python --version
             ansible --version  
             ls -alh workspace
             ansible-galaxy collection install --force workspace/*.tar.gz
-            
+      - run:
+          name: Copy static files
+          command: |
+            mkdir -p group_vars
+            echo ${GROUP_VARS} | base64 -d > group_vars/dnac_servers.yml
+            echo ${DNAC_HOSTS} | base64 -d > hosts
       - run:
           name: Run sanity tests
           command: |
@@ -323,6 +316,8 @@ workflows:
       - addrole
 
       - sanity-tests:
+          context:
+            - dnac-servers
           requires:
             - addrole
           matrix:
