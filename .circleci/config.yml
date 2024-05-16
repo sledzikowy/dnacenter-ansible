@@ -236,8 +236,7 @@ jobs:
             pip install ansible 
             pip install dnacentersdk
             ansible --version
-      - attach_workspace:
-          at: workspace
+            ls -alh
       - run:
           name: Install the collection tarball
           command: |
