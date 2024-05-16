@@ -129,7 +129,7 @@ jobs:
             - run:
                 name: Create Roles File header
                 command: |
-                  mkdir workspace
+                  mkdir -p workspace
                   cat /tmp/pipeline-parameters.json
                   echo "---" > workspace/ccc_roles.yml
                   echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
@@ -195,10 +195,7 @@ jobs:
                 key: collection-<< pipeline.git.revision >>
                 paths:
                   - 'workspace'
-      - unless:
-          condition: << pipeline.parameters.run-setup >>
-          steps:
-            - run: echo "use cached"
+      - run: echo "dummy"
 
   sanity-tests:
     parameters: 
