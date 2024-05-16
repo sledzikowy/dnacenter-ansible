@@ -117,7 +117,7 @@ jobs:
             ansible --version
             # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
             ansible-galaxy collection build --force --output-path workspace/
-            ls -alh workspace
+
       - persist_to_workspace:
           root: 'workspace'
           paths:
@@ -187,13 +187,6 @@ jobs:
                 command: |
                   echo "    - ccc_pnp_management" >> workspace/ccc_roles.yml
 
-
-      - run:
-          name: Move artifacts to workspace root
-          command: |
-            ls -alh workspace
-            cat workspace/ccc_roles.yml
-
       - save_cache:
           key: collection-<< pipeline.git.revision >>
           paths:
@@ -242,7 +235,6 @@ jobs:
             pip install ansible 
             pip install dnacentersdk
             ansible --version
-            ls -alh
       - run:
           name: Install the collection tarball
           command: |
@@ -262,6 +254,9 @@ jobs:
             export ANSIBLE_PERSISTENT_CONNECT_TIMEOUT=1000
             export ANSIBLE_PERSISTENT_COMMAND_TIMEOUT=1000
             export ANSIBLE_ROLES_PATH=$PWD/tests/integration
+
+            ls -alh 
+            cat ccc_roles.yml
 
             ansible-playbook -i hosts ccc_roles.yml
 
