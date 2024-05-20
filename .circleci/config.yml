@@ -191,11 +191,11 @@ jobs:
           key: collection-<< pipeline.git.revision >>
           paths:
             - 'workspace'
-      run: 
-        command: |
-          ls -alh
-          ls -alh workspace
-          cat workspace/ccc_roles.yml
+      - run: 
+          command: |
+            ls -alh
+            ls -alh workspace
+            cat workspace/ccc_roles.yml
 
   sanity-tests:
     parameters: 
