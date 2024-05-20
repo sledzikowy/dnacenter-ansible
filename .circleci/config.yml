@@ -97,27 +97,21 @@ jobs:
 
       - restore_cache:
           keys:
-            - pip-cache
+            - pip-cache-{{ checksum "test-requirements.txt" }}
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
             # Install ansible, dnacentersdk
             pip install --upgrade pip
-            pip install jinja2 PyYAML cryptography paramiko
-            pip install pyzipper
-            pip install ansible 
-            pip install dnacentersdk
-            pip cache dir
-            ansible --version
-            pip freeze
+            pip install -r test-requirements.txt
             # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
             ansible-galaxy collection build --force --output-path workspace/
       - save_cache:
           key: collection-<< pipeline.git.revision >>
           paths:
             - 'workspace'
-      - save_cache: # should be changed to run only on requirements.txt change or moved to docker image build
-          key: pip-cache
+      - save_cache:
+          key: pip-cache-{{ checksum "test-requirements.txt" }}
           paths:
             - ~/.cache/pip
 
@@ -230,17 +224,15 @@ jobs:
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
-            - pip-cache
+      - restore_cache:
+          keys:
+            - pip-cache-{{ checksum "test-requirements.txt" }}
       - run:
           name: Activate Virtual Environment, Install ansible and Build collection tarball
           command: |
-
             # Install ansible, dnacentersdk
             pip install --upgrade pip
-            pip install jinja2 PyYAML cryptography paramiko 
-            pip install pyzipper
-            pip install ansible 
-            pip install dnacentersdk
+            pip install -r test-requirements.txt
             ansible --version
       - run:
           name: Install the collection tarball
@@ -277,7 +269,7 @@ jobs:
           steps:
             - run: 
                 command: |
-                  python ${HOME}/static/pnp_script.py
+                  python ${HOME}/static/pnp_script.py #TODO
 
 workflows:  
   
