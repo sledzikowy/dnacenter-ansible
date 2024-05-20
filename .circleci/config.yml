@@ -277,6 +277,7 @@ jobs:
 
 workflows:  
   building:
+    when: << pipeline.parameters.run-setup >>
     jobs:
       - pre
 
