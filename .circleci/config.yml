@@ -81,38 +81,44 @@ jobs:
             echo "REPO_URL: $REPO_URL"
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
-      - when:
-          condition: << pipeline.parameters.run-setup >>
-          steps:
-            - run:
-                name: Clone repo to workspace
-                command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - restore_cache:
+          keys:
+            - collection-<< pipeline.git.revision >>
+      - run:
+          name: Skip if already build
+          command: |
+            if [ $(ls workspace/*tar.gz) ]; then
+                ls -alh workspace
+                circleci-agent step halt
+            fi
+      - run:
+          name: Clone repo to workspace
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
 
-            - restore_cache:
-                keys:
-                  - pip-cache
-            - run:
-                name: Activate Virtual Environment, Install ansible and Build collection tarball
-                command: |
-                  # Install ansible, dnacentersdk
-                  pip install --upgrade pip
-                  pip install jinja2 PyYAML cryptography paramiko
-                  pip install pyzipper
-                  pip install ansible 
-                  pip install dnacentersdk
-                  ansible --version
-                  # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
-                  ansible-galaxy collection build --force --output-path workspace/
-
-            - persist_to_workspace:
-                root: 'workspace'
-                paths:
-                  - '*.tar.gz'
-
-            - save_cache: # should be changed to run only on requirements.txt change or moved to docker image build
-                key: pip-cache
-                paths:
-                  - ~/.cache/pip
+      - restore_cache:
+          keys:
+            - pip-cache
+      - run:
+          name: Activate Virtual Environment, Install ansible and Build collection tarball
+          command: |
+            # Install ansible, dnacentersdk
+            pip install --upgrade pip
+            pip install jinja2 PyYAML cryptography paramiko
+            pip install pyzipper
+            pip install ansible 
+            pip install dnacentersdk
+            pip cache dir
+            ansible --version
+            # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
+            ansible-galaxy collection build --force --output-path workspace/
+      - save_cache:
+          key: collection-<< pipeline.git.revision >>
+          paths:
+            - 'workspace'
+      - save_cache: # should be changed to run only on requirements.txt change or moved to docker image build
+          key: pip-cache
+          paths:
+            - ~/.cache/pip
 
   addrole:
     #machine: true
@@ -121,30 +127,28 @@ jobs:
     resource_class: rukapse/dnacenter-ansible-minikube
 
     steps:
-      - attach_workspace:
-          at: workspace
       - run:
           name: Create Roles File header
           command: |
-            mkdir -p workspace
-            echo "---" > workspace/ccc_roles.yml
-            echo "- hosts: dnac_servers" >> workspace/ccc_roles.yml
-            echo "  gather_facts: no" >> workspace/ccc_roles.yml
-            echo "  connection: local" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  tasks:" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  vars:" >> workspace/ccc_roles.yml
-            echo "    debug: false" >> workspace/ccc_roles.yml
-            echo "  " >> workspace/ccc_roles.yml
-            echo "  roles:" >> workspace/ccc_roles.yml
+            mkdir -p roles-file
+            echo "---" > roles-file/ccc_roles.yml
+            echo "- hosts: dnac_servers" >> roles-file/ccc_roles.yml
+            echo "  gather_facts: no" >> roles-file/ccc_roles.yml
+            echo "  connection: local" >> roles-file/ccc_roles.yml
+            echo "  " >> roles-file/ccc_roles.yml
+            echo "  tasks:" >> roles-file/ccc_roles.yml
+            echo "  " >> roles-file/ccc_roles.yml
+            echo "  vars:" >> roles-file/ccc_roles.yml
+            echo "    debug: false" >> roles-file/ccc_roles.yml
+            echo "  " >> roles-file/ccc_roles.yml
+            echo "  roles:" >> roles-file/ccc_roles.yml
       - when:
           condition: 
             or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_site_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_site_management" >> roles-file/ccc_roles.yml
 
       - when:
           condition:
@@ -152,7 +156,7 @@ jobs:
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_device_credential_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_device_credential_management" >> roles-file/ccc_roles.yml
 
       - when:
           condition:
@@ -160,7 +164,7 @@ jobs:
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_discovery_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_discovery_management" >> roles-file/ccc_roles.yml
 
       - when:
           condition:
@@ -168,7 +172,7 @@ jobs:
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_inventory_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_inventory_management" >> roles-file/ccc_roles.yml
 
       - when:
           condition:
@@ -176,7 +180,7 @@ jobs:
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_swim_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_swim_management" >> roles-file/ccc_roles.yml
 
 
       - when:
@@ -185,18 +189,12 @@ jobs:
           steps:
             - run: 
                 command: |
-                  echo "    - ccc_pnp_management" >> workspace/ccc_roles.yml
+                  echo "    - ccc_pnp_management" >> roles-file/ccc_roles.yml
 
-      - save_cache:
-          key: collection-<< pipeline.git.revision >>
+      - persist_to_workspace:
+          root: 'roles-file'
           paths:
-            - 'workspace'
-      - run: 
-          command: |
-            ls -alh
-            ls -alh workspace
-            cat workspace/ccc_roles.yml
-
+            - 'ccc_roles.yml'
   sanity-tests:
     parameters: 
       ansible_cisco_dnac_version:
@@ -224,7 +222,10 @@ jobs:
       - run:
           name: Clone repo to workspace
           command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
-          
+
+      - attach_workspace:
+          at: roles-file
+
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
@@ -250,7 +251,7 @@ jobs:
           name: Copy static files
           command: |
             mkdir -p group_vars
-            cp workspace/ccc_roles.yml ccc_roles.yml
+            cp roles-file/ccc_roles.yml ccc_roles.yml
             echo ${GROUP_VARS} | base64 -d > group_vars/dnac_servers.yml
             echo ${DNAC_HOSTS} | base64 -d > hosts
       - run:
@@ -258,11 +259,6 @@ jobs:
           command: |
             export ANSIBLE_PERSISTENT_CONNECT_TIMEOUT=1000
             export ANSIBLE_PERSISTENT_COMMAND_TIMEOUT=1000
-            export ANSIBLE_ROLES_PATH=$PWD/tests/integration
-
-            ls -alh
-            ls -alh workspace
-            cat ccc_roles.yml
             ansible-playbook -i hosts ccc_roles.yml
 
           no_output_timeout: 120m
@@ -322,13 +318,11 @@ workflows:
             tests/integration/ccc_inventory_management/.* run-inventory true
             tests/integration/ccc_swim_management/.* run-swim true
             tests/integration/ccc_pnp_management/.* run-pnp true
-      - addrole:
-          requires:
-            - path-filtering/filter
 
   testing:
     when: << pipeline.parameters.run-any >>
-    jobs:         
+    jobs:
+      - addrole    
       - sanity-tests:
           context:
             - dnac-servers
