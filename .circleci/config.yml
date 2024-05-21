@@ -6,9 +6,21 @@ orbs:
   path-filtering: circleci/path-filtering@0.1.7
 
 parameters:
+  GHA_Event:
+    type: string
+    default: ""
+  GHA_Actor:
+    type: string
+    default: ""
+  GHA_Action:
+    type: string
+    default: ""
+  GHA_Meta:
+    type: string
+    default: ""
   run-setup:
     type: boolean
-    default: true
+    default: false
   run-any:
     type: boolean
     default: false
@@ -116,6 +128,10 @@ jobs:
             - ~/.cache/pip
 
   addrole:
+    parameters: 
+      run-all:
+        type: boolean
+        default: true
     #machine: true
     docker:
       - image: python:3.8.10
@@ -139,7 +155,7 @@ jobs:
             echo "  roles:" >> roles-file/ccc_roles.yml
       - when:
           condition: 
-            or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-site >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -147,7 +163,7 @@ jobs:
 
       - when:
           condition:
-            or: [ << pipeline.parameters.run-devicecredential >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-devicecredential >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -155,7 +171,7 @@ jobs:
 
       - when:
           condition:
-            or: [ << pipeline.parameters.run-discovery >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-discovery >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -163,7 +179,7 @@ jobs:
 
       - when:
           condition:
-            or: [ << pipeline.parameters.run-inventory >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-inventory >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -171,7 +187,7 @@ jobs:
 
       - when:
           condition:
-            or: [ << pipeline.parameters.run-swim >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-swim >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -180,7 +196,7 @@ jobs:
 
       - when:
           condition:
-            or: [ << pipeline.parameters.run-pnp >>, << pipeline.parameters.run-all >> ]
+            or: [ << pipeline.parameters.run-pnp >>, << pipeline.parameters.run-all >>, << parameters.run-all >> ]
           steps:
             - run: 
                 command: |
@@ -291,19 +307,25 @@ jobs:
       - image: python:3.8.10
     resource_class: rukapse/dnacenter-ansible-minikube 
     steps:
-      - checkout
+      - run:
+          name: Clone repo to workspace
+          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - restore_cache:
+          keys:
+            - collection-<< pipeline.git.revision >>
       - add_ssh_keys:
           fingerprints:
             - "KEY_FINGERPRINT"
       - run:
           git tag -a v<< parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< parameters.ansible_cisco_dnac_version >>"
           gh release create "v<< parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< parameters.ansible_cisco_dnac_version >>" --latest
-          ansible-galaxy collection build
-          ansible-galaxy collection install --force ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz
-          ansible-galaxy collection publish ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz --api-key=$GALAXYKEY
+          ansible-galaxy collection publish workspace/*.tar.gz --api-key=$GALAXYKEY
 workflows:
   building:
-    when: << pipeline.parameters.run-setup >>
+    when:
+      or:
+        - equal: [ run-tests, << pipeline.GHA_Meta >> ]
+        - equal: [ true,  << pipeline.parameters.run-setup >> ]
     jobs:
       - pre
 
@@ -358,4 +380,50 @@ workflows:
       # - post_pnp_testing:
       #     requires:
       #       - sanity-tests
- 
+
+  release-candidate:
+    when:
+      or:
+        - equal: [ run-release-prep, << pipeline.GHA_Meta >> ]
+    jobs:
+      - addrole:
+          matrix:
+            parameters:
+              run-all:
+                - true   
+      - sanity-tests:
+          requires: 
+            - addrole
+          context:
+            - dnac-servers
+          matrix:
+            parameters:
+              ansible_cisco_dnac_version:
+                - "6.9.0" 
+      - hold:
+          type: approval
+          requires: 
+            - sanity-tests
+      
+      - main-pr:
+          context:
+            - gh-token
+          requires:
+            - hold
+
+  release:
+    when:
+      or:
+        - equal: [ run-release, << pipeline.GHA_Meta >> ]
+    jobs:   
+      - build:
+          matrix:
+            parameters:
+              ansible_cisco_dnac_version:
+                - "6.9.0"
+      - release-job:
+          requires:
+              - build
+          context:
+            - gh-token
+            - galaxy-token
