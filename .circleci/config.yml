@@ -270,9 +270,38 @@ jobs:
             - run: 
                 command: |
                   python ${HOME}/static/pnp_script.py #TODO
+  main-pr:
+    parameters: 
+      ansible_cisco_dnac_version:
+        type: string
+        default: "6.9.0"
+    docker:
+      - image: python:3.8.10
+    resource_class: rukapse/dnacenter-ansible-minikube 
+    steps:
+      - run:
+          gh pr create --base main --head << pipeline.git.branch >> --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
 
-workflows:  
-  
+  release-job:
+    parameters: 
+      ansible_cisco_dnac_version:
+        type: string
+        default: "6.9.0"
+    docker:
+      - image: python:3.8.10
+    resource_class: rukapse/dnacenter-ansible-minikube 
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "KEY_FINGERPRINT"
+      - run:
+          git tag -a v<< parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< parameters.ansible_cisco_dnac_version >>"
+          gh release create "v<< parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< parameters.ansible_cisco_dnac_version >>" --latest
+          ansible-galaxy collection build
+          ansible-galaxy collection install --force ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz
+          ansible-galaxy collection publish ${HOME}/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs/*.tar.gz --api-key=$GALAXYKEY
+workflows:
   building:
     when: << pipeline.parameters.run-setup >>
     jobs:
