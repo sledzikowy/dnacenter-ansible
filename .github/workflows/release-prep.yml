@@ -12,7 +12,7 @@ jobs:
         id: trigger-circle-ci
         uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
         with:
-          target-slug: "rukapse/dnacenter-ansible"
+          target-slug: "gh/rukapse/dnacenter-ansible"
           GHA_Meta: "run-release-prep"
         env:
           CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
