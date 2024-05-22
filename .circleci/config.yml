@@ -57,20 +57,20 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube
 
-    environment:
-      CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
-      CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
+    # environment:
+    #   CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
+    #   CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
 
     steps:
-      - run:
-          name: Debug information for pre
-          command: |
-            set -x 
-            echo "REPO_URL: $REPO_URL"
-            echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
-            echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
+      # - run:
+      #     name: Debug information for pre
+      #     command: |
+      #       set -x 
+      #       echo "REPO_URL: $REPO_URL"
+      #       echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
+      #       echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
 
   build: 
     parameters: 
@@ -81,18 +81,18 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube
-    environment:
-      REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
-      CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
-      CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube
+    # environment:
+    #   REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
+    #   CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
+    #   CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
     steps:
-      - run:
-          name: Debug information
-          command: |
-            echo "REPO_URL: $REPO_URL"
-            echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
-            echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
+      # - run:
+      #     name: Debug information
+      #     command: |
+      #       echo "REPO_URL: $REPO_URL"
+      #       echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
+      #       echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
@@ -103,9 +103,7 @@ jobs:
                 ls -alh workspace
                 circleci-agent step halt
             fi
-      - run:
-          name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - checkout
 
       - restore_cache:
           keys:
@@ -135,7 +133,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube
 
     steps:
       - run:
@@ -215,24 +213,22 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube 
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
 
-    environment:
-      REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
-      CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
-      CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
+    # environment:
+    #   REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
+    #   CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
+    #   CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
 
     steps:
-      - run:
-          name: Debug information
-          command: |
-            echo "REPO_URL: $REPO_URL"
-            echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
-            echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
+      # - run:
+      #     name: Debug information
+      #     command: |
+      #       echo "REPO_URL: $REPO_URL"
+      #       echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
+      #       echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
 
-      - run:
-          name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - checkout
 
       - attach_workspace:
           at: roles-file
@@ -277,7 +273,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube
 
     steps:
       - when:
@@ -293,7 +289,7 @@ jobs:
         default: "6.9.0"
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube 
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
     steps:
       - run:
           gh pr create --base main --head << pipeline.git.branch >> --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
@@ -305,11 +301,9 @@ jobs:
         default: "6.9.0"
     docker:
       - image: python:3.8.10
-    resource_class: rukapse/dnacenter-ansible-minikube 
+    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
     steps:
-      - run:
-          name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_PROJECT_BRANCHNAME $REPO_URL .
+      - checkout
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
@@ -324,7 +318,7 @@ workflows:
   building:
     when:
       or:
-        - equal: [ run-tests, << pipeline.trigger_parameters.webhook.body >> ]
+        - equal: [ run-tests, << pipeline.parameters.GHA_Meta >> ]
         - equal: [ true,  << pipeline.parameters.run-setup >> ]
     jobs:
       - pre
