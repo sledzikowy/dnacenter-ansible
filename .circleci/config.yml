@@ -414,6 +414,7 @@ workflows:
       - sanity-tests:
           requires: 
             - addrole
+            - build
           context:
             - dnac-servers
           matrix:
