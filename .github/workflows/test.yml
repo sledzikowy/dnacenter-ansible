@@ -13,14 +13,13 @@ jobs:
             name: github_ref-${{ github.event.workflow_run.id }}
             run-id: ${{ github.event.workflow_run.id }}
             github-token: ${{ secrets.GITHUB_TOKEN }}
-        - name: Create directory
+        - name: Trigger circleci
           run: |
-             ls -R && \
-             cat github_ref && \
+             printf '{"branch": "%s" ,"parameters": {"GHA_Meta":"run-tests"}}' $(cat github_ref) > req_body
              curl -X POST --location "https://circleci.com/api/v2/project/gh/sledzikowy/dnacenter-ansible/pipeline" \
                 -H "Content-Type: application/json" \
                 -H "Circle-Token: ${{ secrets.CCI_TOKEN }}" \
-                -d '{"branch": "$(cat github_ref)","parametters": {"GHA_Meta":"run-tests"}}'
+                -d "@req_body"
     #   - name: Trigger CircleCI
     #     id: trigger-circle-ci
     #     uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
