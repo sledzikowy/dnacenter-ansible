@@ -107,8 +107,10 @@ jobs:
             fi
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
-
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - restore_cache:
           keys:
             - pip-cache-{{ checksum "test-requirements.txt" }}
@@ -234,8 +236,10 @@ jobs:
 
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
-
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - attach_workspace:
           at: roles-file
 
@@ -311,7 +315,10 @@ jobs:
     steps:
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
