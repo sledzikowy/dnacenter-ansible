@@ -105,8 +105,12 @@ jobs:
                 ls -alh workspace
                 circleci-agent step halt
             fi
-      - checkout
-
+      - run:
+          name: Clone repo to workspace
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - restore_cache:
           keys:
             - pip-cache-{{ checksum "test-requirements.txt" }}
@@ -230,8 +234,12 @@ jobs:
       #       echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
       #       echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
 
-      - checkout
-
+      - run:
+          name: Clone repo to workspace
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - attach_workspace:
           at: roles-file
 
@@ -294,7 +302,7 @@ jobs:
     resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - run:
-          gh pr create --base main --head << pipeline.git.branch >> --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
+          gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
 
   release-job:
     parameters: 
@@ -305,17 +313,23 @@ jobs:
       - image: python:3.8.10
     resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
-      - checkout
+      - run:
+          name: Clone repo to workspace
+          command: |
+            git clone --depth=1 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
+            git fetch origin $CIRCLE_BRANCH:work
+            git checkout work
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
-      - add_ssh_keys:
-          fingerprints:
-            - "KEY_FINGERPRINT"
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "KEY_FINGERPRINT"
       - run:
-          git tag -a v<< parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< parameters.ansible_cisco_dnac_version >>"
-          gh release create "v<< parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< parameters.ansible_cisco_dnac_version >>" --latest
-          ansible-galaxy collection publish workspace/*.tar.gz --api-key=$GALAXYKEY
+          echo create release
+          #git tag -a v<< parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< parameters.ansible_cisco_dnac_version >>"
+          #gh release create "v<< parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< parameters.ansible_cisco_dnac_version >>" --latest
+          #ansible-galaxy collection publish workspace/*.tar.gz --api-key=$GALAXYKEY
 workflows:
   building:
     when:
