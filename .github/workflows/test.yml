@@ -23,8 +23,4 @@ jobs:
     #     with:
     #       GHA_Meta: "run-tests"
     #     env:
-<<<<<<< HEAD
     #       CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
-=======
-    #       CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
->>>>>>> origin/main
