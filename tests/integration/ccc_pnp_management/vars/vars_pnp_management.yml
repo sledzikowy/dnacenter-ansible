@@ -15,7 +15,6 @@ pnp_delete:
           pid: C9300-48T
 
 
-
 pnp_claim:
   cat9k:
     - device_info:
