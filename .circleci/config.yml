@@ -401,6 +401,11 @@ workflows:
       or:
         - equal: [ run-release-prep, << pipeline.parameters.GHA_Meta >> ]
     jobs:
+      - build:
+          matrix:
+            parameters:
+              ansible_cisco_dnac_version:
+                - "6.9.0"
       - addrole:
           matrix:
             parameters:
