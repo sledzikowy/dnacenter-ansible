@@ -324,7 +324,7 @@ workflows:
   building:
     when:
       or:
-        - equal: [ run-tests, << pipeline.GHA_Meta >> ]
+        - equal: [ run-tests, << pipeline.parameters.GHA_Meta >> ]
         - equal: [ true,  << pipeline.parameters.run-setup >> ]
     jobs:
       - pre
@@ -384,7 +384,7 @@ workflows:
   release-candidate:
     when:
       or:
-        - equal: [ run-release-prep, << pipeline.GHA_Meta >> ]
+        - equal: [ run-release-prep, << pipeline.parameters.GHA_Meta >> ]
     jobs:
       - addrole:
           matrix:
@@ -414,7 +414,7 @@ workflows:
   release:
     when:
       or:
-        - equal: [ run-release, << pipeline.GHA_Meta >> ]
+        - equal: [ run-release, << pipeline.parameters.GHA_Meta >> ]
     jobs:   
       - build:
           matrix:
