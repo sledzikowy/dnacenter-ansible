@@ -7,4 +7,9 @@ jobs:
     if: github.event.review.state == 'approved'
     runs-on: ubuntu-20.04
     steps:
-      - run: env
+      - run: echo -n "${GITHUB_REF}" | sed -r 's/^refs\///' | sed -r 's/merge/head/' > github_ref
+      - name: Store ref for circleci trigger
+        uses: actions/upload-artifact@v3
+        with:
+          name: github_ref-${{ github.workflow.sha }}
+          path: github_ref

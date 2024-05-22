@@ -8,13 +8,15 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-        - run: env
+        - uses: actions/download-artifact@v3
+          with:
+            name: github_ref-${{ github.event.workflow_run.sha }}
         - name: Create directory
           run: |
              curl -X POST --location "https://circleci.com/api/v2/project/gh/sledzikowy/dnacenter-ansible/pipeline" \
                 -H "Content-Type: application/json" \
                 -H "Circle-Token: ${{ secrets.CCI_TOKEN }}" \
-                -d '{"branch": "${{ github.event.workflow_run.head_branch }}","parametters": {"GHA_Meta":"run-tests"}}'
+                -d '{"branch": "$(cat github_ref)","parametters": {"GHA_Meta":"run-tests"}}'
     #   - name: Trigger CircleCI
     #     id: trigger-circle-ci
     #     uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
