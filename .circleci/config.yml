@@ -324,7 +324,7 @@ workflows:
   building:
     when:
       or:
-        - equal: [ run-tests, << pipeline.parameters.GHA_Meta >> ]
+        - equal: [ run-tests, << pipeline.trigger_parameters.webhook.body >> ]
         - equal: [ true,  << pipeline.parameters.run-setup >> ]
     jobs:
       - pre
