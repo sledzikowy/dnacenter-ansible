@@ -3,17 +3,21 @@ on:
   workflow_run:
     workflows:
       - main
-    types:
-      - completed
 jobs:
   trigger-circleci:
     runs-on: ubuntu-20.04
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Trigger CircleCI
-        id: trigger-circle-ci
-        uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
-        with:
-          GHA_Meta: "run-tests"
-        env:
-          CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+        - name: Create directory
+          run: |
+             curl -X POST --location "https://circleci.com/api/v2/project/gh/sledzikowy/dnacenter-ansible/pipeline" \
+                -H "Content-Type: application/json" \
+                -H "Circle-Token: ${{ secrets.CCI_TOKEN }}" \
+                -d '{"branch": "${{ github.event.workflow_run.head_branch }}","parametters": {"GHA_Meta":"run-tests"}}'
+    #   - name: Trigger CircleCI
+    #     id: trigger-circle-ci
+    #     uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
+    #     with:
+    #       GHA_Meta: "run-tests"
+    #     env:
+    #       CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
