@@ -7,10 +7,4 @@ jobs:
     if: github.event.review.state == 'approved'
     runs-on: ubuntu-20.04
     steps:
-      - name: Trigger CircleCI
-        id: trigger-circle-ci
-        uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
-        with:
-          GHA_Meta: "run-tests"
-        env:
-          CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+      - run: env
