@@ -298,7 +298,7 @@ jobs:
         type: string
         default: "6.9.0"
     docker:
-      - image: python:3.8.10
+      - image: maniator/gh:v2.49.2
     resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - run:
