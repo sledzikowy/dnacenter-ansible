@@ -64,6 +64,8 @@ jobs:
     #   CIRCLE_PROJECT_BRANCHNAME: << pipeline.trigger_parameters.github_app.branch >>
 
     steps:
+      - run:
+          command: echo dummy
       # - run:
       #     name: Debug information for pre
       #     command: |
