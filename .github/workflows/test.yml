@@ -9,7 +9,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     steps:
         - run: env
-        - run: echo "${{ github.event.workflow_run }}"
+        - run: echo "${{ toJson(github.event.workflow_run) }}"
         - uses: actions/download-artifact@v3
           with:
             name: github_ref-${{ github.event.workflow_run }}
