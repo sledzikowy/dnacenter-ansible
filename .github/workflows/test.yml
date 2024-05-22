@@ -15,6 +15,8 @@ jobs:
             github-token: ${{ secrets.GITHUB_TOKEN }}
         - name: Create directory
           run: |
+             ls -R && \
+             cat github_ref && \
              curl -X POST --location "https://circleci.com/api/v2/project/gh/sledzikowy/dnacenter-ansible/pipeline" \
                 -H "Content-Type: application/json" \
                 -H "Circle-Token: ${{ secrets.CCI_TOKEN }}" \
