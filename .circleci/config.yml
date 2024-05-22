@@ -107,7 +107,7 @@ jobs:
             fi
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b << pipeline.git.branch >> << pipeline.project.git_url >> .
+          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
 
       - restore_cache:
           keys:
@@ -234,7 +234,7 @@ jobs:
 
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b << pipeline.git.branch >> << pipeline.project.git_url >> .
+          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
 
       - attach_workspace:
           at: roles-file
@@ -298,7 +298,7 @@ jobs:
     resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - run:
-          gh pr create --base main --head << pipeline.git.branch >> --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
+          gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
 
   release-job:
     parameters: 
@@ -311,7 +311,7 @@ jobs:
     steps:
       - run:
           name: Clone repo to workspace
-          command: git clone --depth=1 -b << pipeline.git.branch >> << pipeline.project.git_url >> .
+          command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
       - restore_cache:
           keys:
             - collection-<< pipeline.git.revision >>
