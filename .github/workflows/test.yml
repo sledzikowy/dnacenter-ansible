@@ -8,11 +8,9 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-        - run: env
-        - run: echo "${{ toJson(github.event.workflow_run) }}"
         - uses: actions/download-artifact@v3
           with:
-            name: github_ref-${{ github.event.workflow_run }}
+            name: github_ref-${{ github.event.workflow_run.id }}
         - name: Create directory
           run: |
              curl -X POST --location "https://circleci.com/api/v2/project/gh/sledzikowy/dnacenter-ansible/pipeline" \
