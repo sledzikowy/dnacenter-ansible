@@ -57,7 +57,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube
+    resource_class: sledzikowy/dnacenter-ansible-minikube
 
     # environment:
     #   CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
@@ -83,7 +83,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube
+    resource_class: sledzikowy/dnacenter-ansible-minikube
     # environment:
     #   REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
     #   CIRCLE_PROJECT_REPONAME: << pipeline.trigger_parameters.github_app.repo_name >>
@@ -135,7 +135,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube
+    resource_class: sledzikowy/dnacenter-ansible-minikube
 
     steps:
       - run:
@@ -215,7 +215,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
 
     # environment:
     #   REPO_URL: << pipeline.trigger_parameters.github_app.repo_url >>
@@ -275,7 +275,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube
+    resource_class: sledzikowy/dnacenter-ansible-minikube
 
     steps:
       - when:
@@ -291,7 +291,7 @@ jobs:
         default: "6.9.0"
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - run:
           gh pr create --base main --head << pipeline.git.branch >> --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
@@ -303,7 +303,7 @@ jobs:
         default: "6.9.0"
     docker:
       - image: python:3.8.10
-    resource_class: test-dnac-demo/dnacenter-ansible-minikube 
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - checkout
       - restore_cache:
