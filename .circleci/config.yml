@@ -305,7 +305,10 @@ jobs:
           name: Clone repo to workspace
           command: git clone --depth=1 -b $CIRCLE_BRANCH https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git .
       - run:
-          gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
+          name: Create release pr to main
+          command: |
+            gh repo set-default $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+            gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
 
 
   release-job:
@@ -400,6 +403,11 @@ workflows:
       or:
         - equal: [ run-release-prep, << pipeline.parameters.GHA_Meta >> ]
     jobs:
+      - build:
+          matrix:
+            parameters:
+              ansible_cisco_dnac_version:
+                - "6.9.0"
       - addrole:
           matrix:
             parameters:
@@ -408,6 +416,7 @@ workflows:
       - sanity-tests:
           requires: 
             - addrole
+            - build
           context:
             - dnac-servers
           matrix:
