@@ -6,6 +6,9 @@ orbs:
   path-filtering: circleci/path-filtering@0.1.7
 
 parameters:
+  continued:
+    type: boolean
+    default: false
   GHA_Event:
     type: string
     default: ""
@@ -340,9 +343,11 @@ jobs:
 workflows:
   building:
     when:
-      or:
-        - equal: [ run-tests, << pipeline.parameters.GHA_Meta >> ]
-        - equal: [ true,  << pipeline.parameters.run-setup >> ]
+      and:
+        - or:
+          - equal: [ run-tests, << pipeline.parameters.GHA_Meta >> ]
+          - equal: [ true,  << pipeline.parameters.run-setup >> ]
+        - not: << pipeline.parameters.continued >>
     jobs:
       - pre
 
@@ -361,6 +366,7 @@ workflows:
           config-path: .circleci/config.yml
           mapping: |
             .* run-setup false
+            .* continued true
 
             plugins/.* run-any true
             tests/integration/.* run-any true
