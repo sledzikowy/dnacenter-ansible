@@ -147,6 +147,10 @@ jobs:
             - ~/.cache/pip
 
   addrole:
+    parameters: 
+      run-all:
+        type: boolean
+        default: false
     #machine: true
     docker:
       - image: python:3.8.10
