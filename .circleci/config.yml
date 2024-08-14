@@ -81,7 +81,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: madhansansel/dnacenter-ansible
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
 
     steps:
       - run:
@@ -101,7 +101,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: madhansansel/dnacenter-ansible
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
     steps:
       - run:
           name: Debug information
@@ -150,7 +150,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: madhansansel/dnacenter-ansible
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
 
     steps:
       - run:
@@ -280,7 +280,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: madhansansel/dnacenter-ansible
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
     parallelism: 4
     steps:
       - run:
@@ -342,7 +342,7 @@ jobs:
     #machine: true
     docker:
       - image: python:3.8.10
-    resource_class: madhansansel/dnacenter-ansible
+    resource_class: sledzikowy/dnacenter-ansible-minikube 
 
     steps:
       - when:
