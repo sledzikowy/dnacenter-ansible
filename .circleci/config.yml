@@ -68,16 +68,14 @@ parameters:
     default: false
   run-networkcompliance:
     type: boolean
-    default: false    
+    default: false
+  ansible_cisco_dnac_version:
+    type: string
+    default: "6.17.0"
 
 jobs:
 
   pre:
-    parameters: 
-      ansible_cisco_dnac_version:
-        type: string
-        default: "6.17.0"
-
     #machine: true
     docker:
       - image: python:3.8.10
@@ -92,12 +90,7 @@ jobs:
             echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
             echo "CIRCLE_PROJECT_BRANCHNAME: $CIRCLE_PROJECT_BRANCHNAME"
 
-  build: 
-    parameters: 
-      ansible_cisco_dnac_version:
-        type: string
-        default: "6.17.0"
-
+  build:
     #machine: true
     docker:
       - image: python:3.8.10
@@ -135,7 +128,7 @@ jobs:
             # Install ansible, dnacentersdk
             pip install --upgrade pip
             pip install -r test-requirements.txt
-            # Build collection and store resulting tarball in directory $HOME/.cache/v<< parameters.ansible_cisco_dnac_version >>/collection-tarballs
+            # Build collection and store resulting tarball in directory $HOME/.cache/v<< pipeline.parameters.ansible_cisco_dnac_version >>/collection-tarballs
             ansible-galaxy collection build --force --output-path workspace/
       - save_cache:
           key: collection-<< pipeline.git.revision >>
@@ -276,11 +269,6 @@ jobs:
           paths:
             - 'ccc_roles.yml'
   sanity-tests:
-    parameters: 
-      ansible_cisco_dnac_version:
-        type: string
-        default: "6.17.0"
-
     #machine: true
     docker:
       - image: python:3.8.10
@@ -357,10 +345,6 @@ jobs:
                   python ${HOME}/static/pnp_script.py #TODO
 
   main-pr:
-    parameters: 
-      ansible_cisco_dnac_version:
-        type: string
-        default: "6.17.0"
     docker:
       - image: maniator/gh:v2.49.2
     resource_class: sledzikowy/dnacenter-ansible-minikube 
@@ -372,13 +356,9 @@ jobs:
           name: Create release pr to main
           command: |
             gh repo set-default $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-            gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< parameters.ansible_cisco_dnac_version >>" --body "Release v<< parameters.ansible_cisco_dnac_version >>"
+            gh pr create --base main --head $CIRCLE_BRANCH --title "Release v<< pipeline.parameters.ansible_cisco_dnac_version >>" --body "Release v<< pipeline.parameters.ansible_cisco_dnac_version >>"
 
   release-job:
-    parameters: 
-      ansible_cisco_dnac_version:
-        type: string
-        default: "6.17.0"
     docker:
       - image: python:3.8.10
     resource_class: sledzikowy/dnacenter-ansible-minikube 
@@ -397,8 +377,8 @@ jobs:
       #       - "KEY_FINGERPRINT"
       - run:
           echo create release
-          #git tag -a v<< parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< parameters.ansible_cisco_dnac_version >>"
-          #gh release create "v<< parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< parameters.ansible_cisco_dnac_version >>" --latest
+          #git tag -a v<< pipeline.parameters.ansible_cisco_dnac_version >> -m "Ansible DNACCollection Version v<< pipeline.parameters.ansible_cisco_dnac_version >>"
+          #gh release create "v<< pipeline.parameters.ansible_cisco_dnac_version >>" --title "DNAC Collection Version v<< pipeline.parameters.ansible_cisco_dnac_version >>" --latest
           #ansible-galaxy collection publish workspace/*.tar.gz --api-key=$GALAXYKEY
 
 workflows:  
@@ -414,10 +394,6 @@ workflows:
       - pre
 
       - build:
-          matrix:
-            parameters:
-              ansible_cisco_dnac_version:
-                - "6.17.0"
           requires:
             - pre
 
@@ -472,10 +448,6 @@ workflows:
             - addrole
           context:
             - dnac-servers
-          matrix:
-            parameters:
-              ansible_cisco_dnac_version:
-                - "6.17.0"
       # - post_pnp_testing:
       #     requires:
       #       - sanity-tests
@@ -485,11 +457,7 @@ workflows:
       or:
         - equal: [ run-release-prep, << pipeline.parameters.GHA_Meta >> ]
     jobs:
-      - build:
-          matrix:
-            parameters:
-              ansible_cisco_dnac_version:
-                - "6.17.0"
+      - build
       - addrole:
           matrix:
             parameters:
@@ -501,10 +469,6 @@ workflows:
             - build
           context:
             - dnac-servers
-          matrix:
-            parameters:
-              ansible_cisco_dnac_version:
-                - "6.17.0" 
       - hold:
           type: approval
           requires: 
@@ -521,11 +485,7 @@ workflows:
       or:
         - equal: [ run-release, << pipeline.parameters.GHA_Meta >> ]
     jobs:   
-      - build:
-          matrix:
-            parameters:
-              ansible_cisco_dnac_version:
-                - "6.17.0"
+      - build
       - release-job:
           requires:
               - build
