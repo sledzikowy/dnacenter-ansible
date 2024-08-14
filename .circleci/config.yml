@@ -428,6 +428,7 @@ workflows:
           config-path: .circleci/config.yml
           mapping: |
             .* run-setup false
+            .* continued true
 
             plugins/.* run-any true
             tests/integration/.* run-any true
