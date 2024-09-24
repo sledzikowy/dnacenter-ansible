@@ -1,0 +1,145 @@
+{
+  "auto_deploy": {
+    "packages": []
+  },
+  "catalog": {
+    "catalog_metadata": {},
+    "parent_catalog_server_repository": "",
+    "parent_catalog_server": "",
+    "catalog_in_cluster": false,
+    "catalog_servers": []
+  },
+  "cloud": {
+    "no_proxy": [
+      "localhost",
+      "127.0.0.1"
+    ],
+    "http_proxy": "",
+    "https_proxy": "http://proxy-wsa.esl.cisco.com:80",
+    "https_proxy_password": "",
+    "https_proxy_username": "",
+    "https_proxy_clear_text_password": ""
+  },
+  "cluster_network": {
+    "cluster_dns": "169.254.20.10",
+    "cluster_hostname": "",
+    "cluster_subnet": "169.254.48.0/20",
+    "cluster_vip": [],
+    "container_subnet": "169.254.32.0/20"
+  },
+  "default_tenant": {
+      "passphrase": "maglev1@3",
+      "tenant_email": "admin@TNT0.com",
+      "tenant_name": "TNT0",
+      "username": "admin"
+  },
+  "fips_enabled": false,
+  "maglev_admin": {
+    "username": "maglev",
+    "clear_text_password": "Maglev123",
+    "group": "maglev"
+  },
+  "lacp_mode": false,
+  "network": [
+    {
+        "inet": {
+            "gateway": "",
+            "host_ip": "85.1.1.2",
+            "netmask": "255.255.255.0",
+            "routes": [
+                {
+                    "gateway": "85.1.1.1",
+                    "netmask": "255.255.0.0",
+                    "network": "91.1.0.0"
+                },
+                {
+                    "gateway": "85.1.1.1",
+                    "netmask": "255.0.0.0",
+                    "network": "204.0.0.0"
+                }
+            ]
+        },
+        "inet6": {
+            "host_ip": "",
+            "netmask": "",
+            "routes": []
+        },
+        "interface": "enterprise",
+        "intra_cluster_link": false,
+        "lacp_mode": false,
+        "lacp_supported": true,
+        "slave": [
+            "ens160"
+        ]
+    },
+    {
+        "inet": {
+            "dns_servers": [],
+            "gateway": "",
+            "host_ip": "169.254.6.66",
+            "netmask": "255.255.255.128",
+            "routes": []
+        },
+        "inet6": {},
+        "interface": "cluster",
+        "intra_cluster_link": true,
+        "lacp_mode": false,
+        "lacp_supported": true,
+        "slave": [
+            "mks-icl"
+        ]
+    },
+    {
+        "inet": {
+            "gateway": "10.195.243.1",
+            "host_ip": "10.195.243.34",
+            "netmask": "255.255.255.0",
+            "routes": []
+        },
+        "inet6": {
+            "host_ip": "",
+            "netmask": "",
+            "routes": []
+        },
+        "interface": "management",
+        "intra_cluster_link": false,
+        "lacp_supported": true,
+        "slave": [
+            "ens192"
+        ]
+    }
+  ],
+  "network_addressing_mode": {
+    "ipv4": true,
+    "ipv6": false
+  },
+  "ntp": {
+    "auth": false,
+    "keys": [],
+    "server_parms": [
+        {
+            "key_id": null
+        }
+    ],
+    "servers": [
+        "ntp.esl.cisco.com"
+    ]
+  },
+  "products": {
+    "maglevsystemseed": true
+  },
+  "roles": {
+    "catalog": false,
+    "master": true,
+    "minimum_iso": false,
+    "seed_master": true,
+    "worker": true
+  },
+  "service_addressing_mode": "ipv4",
+  "ssh_port": 2222,
+  "upstream_dns_servers": [
+    "171.70.168.183"
+  ],
+  "version": "2",
+  "vlan_mode": false
+}

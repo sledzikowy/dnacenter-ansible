@@ -1,0 +1,83 @@
+{
+  "auto_deploy": {
+    "packages": []
+  },
+  "catalog": {
+    "catalog_metadata": {},
+    "parent_catalog_server_repository": "",
+    "parent_catalog_server": "",
+    "catalog_in_cluster": false,
+    "catalog_servers": []
+  },
+  "cloud": {
+    "no_proxy": [
+      "localhost",
+      "127.0.0.1"
+    ],
+    "http_proxy": "",
+    "https_proxy": "http://proxy-wsa.esl.cisco.com:80",
+    "https_proxy_password": "",
+    "https_proxy_username": "",
+    "https_proxy_clear_text_password": ""
+  },
+  "cluster_network": {
+    "cluster_vip": [],
+    "cluster_subnet": "10.26.0.0/16",
+    "cluster_dns": "",
+    "cluster_hostname": "",
+    "container_subnet": "10.78.0.0/16"
+  },
+  "default_tenant": {
+    "username": "admin",
+    "tenant_name": "TNT0",
+    "passphrase": "Maglev123",
+    "tenant_email": "admin@TNT0.com"
+  },
+  "fips_enabled": false,
+  "maglev_admin": {
+    "username": "maglev",
+    "clear_text_password": "Maglev123",
+    "group": "maglev"
+  },
+  "network_addressing_mode": {
+    "ipv4": true,
+    "ipv6": false
+  },
+  "network": [
+    {
+      "inet": {
+        "gateway": "85.1.1.5",
+        "host_ip": "85.1.1.61",
+        "netmask": "255.255.255.0",
+        "routes": []
+      },
+      "inet6": {
+        "routes": [],
+        "netmask": "",
+        "host_ip": "",
+        "gateway": ""
+      }
+    }
+  ],
+  "ntp": {
+    "servers": [
+      "72.163.32.44",
+      "10.81.254.202",
+      "173.38.201.67"
+    ]
+  },
+  "products": {
+    "maglevsystemseed": true
+  },
+  "roles": {
+    "worker": true,
+    "catalog": true,
+    "master": true,
+    "seed_master": true
+  },
+  "ssh_port": 2222,
+  "upstream_dns_servers": [
+    "171.70.168.183"
+  ],
+  "version": "1"
+}
